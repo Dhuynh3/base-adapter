@@ -18,23 +18,28 @@ public class Gateway {
     private static Router router;
 
     public Gateway() {
-        log.info("Gateway Constructor Called");
+        log.info("[Gateway] : Constructor Called");
     }
-
 
     /**
      * NOTES: The @Observes Router executes first than StartupEvent.
      * @param route
      */
     public void initRoute(@Observes Router route) {
-        log.info("Gateway initRoute called");
-        Gateway.router = route;
-        router.route(HttpMethod.GET, "/microservice-inbound").handler(msgHandler::handleMessage);
-        router.route(HttpMethod.GET, "/status").handler(msgHandler::handleStatus);
+        log.info("[Gateway] : initRoute called");
 
+        // Store the route
+        Gateway.router = route;
+        
+        // Required routes to setup on adapter startup
+        // "/initialize" For microservice to initialize the adapter
         router.route(HttpMethod.POST, "/initialize").handler(msgHandler::handleInitialization);
 
+        // "/status" For microservice to get status of the adapter
+        router.route(HttpMethod.GET, "/status").handler(msgHandler::handleStatus);
 
+        // "/microservice-inbound" For microservice to send the message
+        router.route(HttpMethod.POST, "/microservice-inbound").handler(msgHandler::handleMessage);
     }
 
 }
